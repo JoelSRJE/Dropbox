@@ -5,13 +5,13 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
 @Table(name = "users")
 @Getter
 @Setter
-@RequiredArgsConstructor
 public class User {
 
     @Id
@@ -19,12 +19,23 @@ public class User {
     private UUID userId;
 
     @Column(unique = true)
-    private String username;
+    private String email;
 
+    @Column(nullable = false)
     private String passwordHash;
 
-    public User(String username, String passwordHash) {
-        this.username = username;
+    @Column(nullable = false)
+    private AccountType accountType;
+
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
+
+    protected User() {}
+
+    public User(String email, String passwordHash) {
+        this.email = email;
         this.passwordHash = passwordHash;
+        this.createdAt = LocalDateTime.now();
+        this.accountType = AccountType.USER;
     }
 }
