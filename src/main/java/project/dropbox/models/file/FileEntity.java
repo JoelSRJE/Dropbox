@@ -2,7 +2,6 @@ package project.dropbox.models.file;
 
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import project.dropbox.models.folder.FolderEntity;
 import project.dropbox.models.user.User;
@@ -36,11 +35,11 @@ public class FileEntity {
 
     protected FileEntity() {}
 
-    public FileEntity(String fileName, byte[] data, FolderEntity folder, User owner) {
+    public FileEntity(String fileName, byte[] data, FolderEntity folder, User fileOwner) {
         this.fileName = fileName;
         this.data = data;
         this.folder = folder;
-        this.fileOwner = owner;
+        this.fileOwner = fileOwner;
     }
 
 }
