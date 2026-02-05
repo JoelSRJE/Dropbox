@@ -2,7 +2,6 @@ package project.dropbox.models.folder;
 
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import project.dropbox.models.user.User;
 
@@ -30,7 +29,7 @@ public class FolderEntity {
     @JoinColumn(name = "parent_folder_id")
     private FolderEntity parentFolder;
 
-    @OneToMany(mappedBy = "parentFolder")
+    @OneToMany(mappedBy = "parentFolder", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FolderEntity> subFolders;
 
     protected FolderEntity() {}

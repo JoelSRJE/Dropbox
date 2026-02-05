@@ -4,10 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import project.dropbox.dto.user.GetUserDto;
-import project.dropbox.exceptions.user.EmailIsBlankException;
-import project.dropbox.exceptions.user.PasswordIsEmptyException;
-import project.dropbox.exceptions.user.UserAlreadyExistException;
-import project.dropbox.exceptions.user.UserDoesntExistsException;
+import project.dropbox.exceptions.user.*;
 import project.dropbox.models.user.User;
 import project.dropbox.repositories.user.UserRepository;
 import project.dropbox.requests.user.LoginUserRequest;
@@ -64,15 +61,22 @@ public class UserService implements IUserService {
 
     @Override
     public String loginUser(LoginUserRequest request) {
-        User userExists = userRepository.findByEmail(request.email());
 
-        User user = userExists;
-
-        if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
-            return null;
+        if (request.email() == null || request.email().isBlank()) {
+            throw new EmailIsBlankException();
         }
 
-        return jwtService.generateToken(user.getUserId());
+        User userExists = userRepository.findByEmail(request.email());
+
+        if (userExists == null) {
+            throw new UserDoesntExistsException();
+        }
+
+        if (!passwordEncoder.matches(request.password(), userExists.getPasswordHash())) {
+            throw new InvalidCredentialsException();
+        }
+
+        return jwtService.generateToken(userExists.getUserId());
     }
 
     @Override
