@@ -15,8 +15,19 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class FileService implements IFileService {
 
+    // Dependency för servicen
     private final FileRepository fileRepository;
 
+    /**
+     * Hittar ett FileEntity-objekt baserat på fileId och fileOwner.
+     *
+     * @param fileId - id:et för FileEntity-objektet som ska hittas.
+     * @param fileOwner - id:et för ägaren av FileEntity-objektet.
+     * @return - ett FileEntity-objekt om det hittas.
+     * @throws FileIdIsNullException - OM filens id:et är null.
+     * @throws FileOwnerIsNullException - OM ägarens id är null.
+     * @throws FileDoesntExistException - OM FileEntity-objektet inte existerar.
+     */
     @Override
     public FileEntity findFileByIdAndOwner(UUID fileId, UUID fileOwner) {
 
@@ -28,10 +39,22 @@ public class FileService implements IFileService {
             throw new FileOwnerIsNullException();
         }
 
-        return fileRepository.findByFileIdAndFileOwner_Id(fileId, fileOwner)
+        return fileRepository.findByFileIdAndFileOwner_UserId(fileId, fileOwner)
                 .orElseThrow(() -> new FileDoesntExistException());
     }
 
+
+    /**
+     * Sparar ett FileEntity-objekt i databasen om allt stämmer.
+     *
+     * @param file - FileEntity-objektet som ska sparas om allt stämmer.
+     * @return - Det sparade FileEntity-objektet som sparas.
+     * @throws FileNameIsEmptyException - OM fileName är null/blank.
+     * @throws FileDataIsNullException - OM data är null.
+     * @throws FileOwnerIsNullException - OM fileOwner är null.
+     * @throws FileFolderIsNullException - OM fileFolder är null.
+     * @throws FileAlreadyExistsException - OM FileEntity-objektet redan existerar i databasen.
+     */
     @Override
     public FileEntity createFile(FileEntity file) {
 
@@ -62,11 +85,15 @@ public class FileService implements IFileService {
         return fileRepository.save(file);
     }
 
-    /*
-    1. Delete funktionen tar emot fileId och ownerId som parametrar
-    och verifieras via simpla null checks.
-    2. Verifierar att filen existerar och därefter raderar den från databasen.
-    3. Skickar därefter tillbaka filen som raderades
+    /**
+     * Raderar ett FileEntity-objekt från databasen.
+     *
+     * @param fileId - id:et för ett FileEntity-objekt.
+     * @param ownerId - id:et för en ägare av ett FileEntity-objekt.
+     * @return - det raderade FileEntity-objektet.
+     * @throws FileIdIsNullException - OM fileId är null.
+     * @throws FileOwnerIdIsNullException - OM ownerId är null.
+     * @throws FileDoesntExistException - OM FileEntity-objektet inte existerar i databasen.
      */
     @Override
     public FileEntity deleteFile(UUID fileId, UUID ownerId) {
@@ -79,7 +106,7 @@ public class FileService implements IFileService {
             throw new FileOwnerIdIsNullException();
         }
 
-        FileEntity deletedFile = fileRepository.findByFileIdAndFileOwner_Id(fileId, ownerId)
+        FileEntity deletedFile = fileRepository.findByFileIdAndFileOwner_UserId(fileId, ownerId)
                 .orElseThrow(() -> new FileDoesntExistException());
 
         fileRepository.delete(deletedFile);
@@ -87,7 +114,16 @@ public class FileService implements IFileService {
         return deletedFile;
     }
 
-    // Skickar tillbaka alla filer för en folder i en List.
+
+    /**
+     * Hittar alla filer för en folder.
+     *
+     * @param folderId - id:et för foldern.
+     * @param ownerId - id:et för ägaren av foldern.
+     * @return - en lista med FileEntity-objekt.
+     * @throws FolderIdIsNullException - OM folderId är null.
+     * @throws FileOwnerIdIsNullException - OM fileOwner är null.
+     */
     @Override
     public List<FileEntity> findFilesByFolder(UUID folderId, UUID ownerId) {
 
@@ -99,20 +135,21 @@ public class FileService implements IFileService {
             throw new FileOwnerIdIsNullException();
         }
 
-        return fileRepository.findByFolder_FolderIdAndFileOwner_Id(folderId, ownerId);
+        return fileRepository.findByFolder_FolderIdAndFileOwner_UserId(folderId, ownerId);
     }
 
 
-    /*
-    Uppdaterar en fil utifrån fileId, request.ownerId samt request.fileName.
-
-    findByFileIdAndFileOwner_Id hittar själva filen
-
-    inuti if-statement hanterar vi uppdateringen med setter från dess Modell och sedan sparas alltihop.
-    */
+    /**
+     * Uppdaterar ett FileEntity-objekt.
+     *
+     * @param fileId - id:et för ett FileEntity-objekt.
+     * @param request - innehåller fileName och ownerId.
+     * @return - Det uppdaterade FileEntity-objektet.
+     * @throws FileDoesntExistException - OM filen inte existerar i databasen.
+     */
     @Override
     public FileEntity updateFileName(UUID fileId, UpdateFileRequest request) {
-        FileEntity theFile = fileRepository.findByFileIdAndFileOwner_Id(fileId, request.ownerId())
+        FileEntity theFile = fileRepository.findByFileIdAndFileOwner_UserId(fileId, request.ownerId())
                 .orElseThrow(() -> new FileDoesntExistException());
 
         if (request.fileName() != null && !request.fileName().isBlank()) {

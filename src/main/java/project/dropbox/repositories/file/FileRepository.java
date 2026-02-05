@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @Repository
 public interface FileRepository extends JpaRepository<FileEntity, UUID> {
-    Optional<FileEntity> findByFileIdAndFileOwner_Id(UUID fileId, UUID ownerId);
+    Optional<FileEntity> findByFileIdAndFileOwner_UserId(UUID fileId, UUID ownerId);
     boolean existsByFileNameAndFolderAndFileOwner(String fileName, FolderEntity folder, User fileOwner);
-    List<FileEntity> findByFolder_FolderIdAndFileOwner_Id(UUID folderId, UUID ownerId);
+    List<FileEntity> findByFolder_FolderIdAndFileOwner_UserId(UUID folderId, UUID ownerId);
 }

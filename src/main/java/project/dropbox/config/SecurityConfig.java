@@ -26,16 +26,8 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> {
                     auth
-                            // Ska bara finnas dessa i slutet.
                             .requestMatchers("/user/register").permitAll()
                             .requestMatchers("/user/login").permitAll()
-                            // För att testa att det går igenom.
-                            .requestMatchers("/file/create").permitAll()
-                            .requestMatchers("/file/files").permitAll()
-                            .requestMatchers("/file/delete/**").permitAll()
-                            .requestMatchers("/file/folder/**").permitAll()
-                            .requestMatchers("/file/update/**").permitAll()
-
                             .anyRequest().authenticated();
                 })
                 .addFilterBefore(

@@ -18,13 +18,22 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserService implements IUserService {
 
+    // Dependencies för servicen
     private final JWTService jwtService;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    /**
+     * Hittar en användare baserat på email.
+     *
+     * @param email - Strängen för emailen som ska hittas.
+     * @return - ett User-objekt om användaren finns.
+     * @throws EmailIsBlankException - OM email strängen är null/blank.
+     * @throws UserDoesntExistsException - OM användaren inte existerar i databasen.
+     */
     @Override
     public User findUserByEmail(String email) {
-        if (email.isBlank()) {
+        if (email == null || email.isBlank()) {
             throw new EmailIsBlankException();
         }
 
@@ -37,6 +46,15 @@ public class UserService implements IUserService {
         return user;
     }
 
+    /**
+     * Registrerar ett nytt User-objekt OM allt går igenom.
+     *
+     * @param user - User-objektet som tas emot från controllern.
+     * @return - Det sparade User-objektet.
+     * @throws EmailIsBlankException - OM email är null/blank.
+     * @throws PasswordIsEmptyException - OM passwordHash är null/blank.
+     * @throws UserAlreadyExistException - OM användaren redan existerar.
+     */
     @Override
     public User registerUser(User user) {
 
@@ -56,9 +74,17 @@ public class UserService implements IUserService {
         user.setPasswordHash(passwordEncoder.encode(user.getPasswordHash()));
 
         return userRepository.save(user);
-
     }
 
+    /**
+     * Skapar en token om all information i LoginUserRequest stämmer, vilket get åtkomst till resterande endpoints.
+     *
+     * @param request - innehåller string email och string password.
+     * @return - en jwt-token vid lyckad inloggning.
+     * @throws EmailIsBlankException - OM email är null/blank.
+     * @throws UserDoesntExistsException - OM användaren är null.
+     * @throws InvalidCredentialsException - OM password inte stämmer.
+     */
     @Override
     public String loginUser(LoginUserRequest request) {
 
@@ -72,13 +98,22 @@ public class UserService implements IUserService {
             throw new UserDoesntExistsException();
         }
 
-        if (!passwordEncoder.matches(request.password(), userExists.getPasswordHash())) {
+        if (request.password() == null || request.password().isBlank()
+                || !passwordEncoder.matches(request.password(), userExists.getPasswordHash())) {
             throw new InvalidCredentialsException();
         }
 
         return jwtService.generateToken(userExists.getUserId());
     }
 
+    /**
+     * Uppdaterar ett befintligt konto i databasen baserat på id och request.
+     *
+     * @param userId - id:et för användaren som ska uppdateras.
+     * @param request - innehåller string email.
+     * @return - det uppdaterade User-objektet.
+     * @throws UserDoesntExistsException - OM användaren inte existerar.
+     */
     @Override
     public User updateUser(UUID userId, UpdateUserRequest request) {
         User user = userRepository.findById(userId)
@@ -91,6 +126,13 @@ public class UserService implements IUserService {
         return userRepository.save(user);
     }
 
+    /**
+     * Raderar ett User-objekt från databasen OM det finns.
+     *
+     * @param userId - id:et för användaren.
+     * @return - det raderade User-objektet.
+     * @throws UserDoesntExistsException - OM användaren inte existerar.
+     */
     @Override
     public User deleteUser(UUID userId) {
         User user = userRepository.findById(userId)
@@ -101,6 +143,11 @@ public class UserService implements IUserService {
         return user;
     }
 
+    /**
+     * Hämtar en lista med alla User-objekt.
+     *
+     * @return - En lista med alla User-objekt.
+     */
     @Override
     public List<GetUserDto> getAllUsers() {
         return userRepository.findAll()
@@ -108,6 +155,4 @@ public class UserService implements IUserService {
                 .map(GetUserDto::from)
                 .toList();
     }
-
-
 }

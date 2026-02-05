@@ -41,17 +41,12 @@ public class UserController {
     public ResponseEntity<?> loginUser(
             @RequestBody LoginUserRequest request
             ) {
-        try {
-            String token = userService.loginUser(request);
 
-            return ResponseEntity.ok(
-                    Map.of("token", token)
-            );
-        } catch (IllegalArgumentException exception) {
-            return ResponseEntity.status(
-                    HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("Error", exception.getMessage()));
-        }
+        String token = userService.loginUser(request);
+
+        return ResponseEntity.ok(
+                Map.of("token", token)
+        );
     }
 
     @PutMapping("/update/{userId}")
