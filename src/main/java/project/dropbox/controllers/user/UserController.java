@@ -3,6 +3,7 @@ package project.dropbox.controllers.user;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import project.dropbox.dto.user.DeletedUserDto;
 import project.dropbox.dto.user.GetUserDto;
@@ -49,14 +50,12 @@ public class UserController {
         );
     }
 
-    @PutMapping("/update/{userId}")
+    @PutMapping("/update")
     public ResponseEntity<UpdatedUserDto> updateUser(
-            @PathVariable UUID userId,
-            @RequestBody UpdateUserRequest request
-            ) {
-
-        User updatedUser = userService.updateUser(userId, request);
-
+            @RequestBody UpdateUserRequest request,
+            @AuthenticationPrincipal User authenticatedUser
+    ) {
+        User updatedUser = userService.updateUser(authenticatedUser.getUserId(), request);
         return ResponseEntity.ok(UpdatedUserDto.from(updatedUser));
     }
 
@@ -65,12 +64,11 @@ public class UserController {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
-    @DeleteMapping("/delete/{userId}")
+    @DeleteMapping("/delete")
     public ResponseEntity<DeletedUserDto> deleteUser(
-    @PathVariable UUID userId
+            @AuthenticationPrincipal User authenticatedUser
     ) {
-        User deletedUser = userService.deleteUser(userId);
-
+        User deletedUser = userService.deleteUser(authenticatedUser.getUserId());
         return ResponseEntity.ok(DeletedUserDto.from(deletedUser));
     }
 }

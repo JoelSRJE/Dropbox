@@ -1,25 +1,27 @@
 package project.dropbox.dto.file;
 
+import project.dropbox.dto.folder.GetFolderDto;
+import project.dropbox.dto.user.GetUserDto;
 import project.dropbox.models.file.FileEntity;
-import project.dropbox.models.folder.FolderEntity;
-import project.dropbox.models.user.User;
 
 import java.util.UUID;
 
 public record GetFileDto(
         UUID fileId,
         String fileName,
-        byte[] data,
-        FolderEntity folder,
-        User fileOwner
+        long size,
+        UUID folderId,
+        String folderName,
+        GetUserDto fileOwner
 ) {
     public static GetFileDto from(FileEntity file) {
         return new GetFileDto(
                 file.getFileId(),
                 file.getFileName(),
-                file.getData(),
-                file.getFolder(),
-                file.getFileOwner()
+                file.getData().length,
+                file.getFolder().getFolderId(),
+                file.getFolder().getFolderName(),
+                GetUserDto.from(file.getFileOwner())
         );
     }
 }

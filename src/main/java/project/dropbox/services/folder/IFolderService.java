@@ -1,6 +1,5 @@
 package project.dropbox.services.folder;
 
-import project.dropbox.models.file.FileEntity;
 import project.dropbox.models.folder.FolderEntity;
 import project.dropbox.requests.folder.CreateFolderRequest;
 import project.dropbox.requests.folder.UpdateFolderRequest;
@@ -14,14 +13,14 @@ public interface IFolderService {
     FolderEntity findFolderById(UUID folderId, UUID folderOwner);
 
     // Skapar ett nytt FolderEntity objekt som sedan sparas i databasen.
-    FolderEntity createFolder(CreateFolderRequest request);
+    FolderEntity createFolder(CreateFolderRequest request, UUID userId);
 
     // Raderar en folder baserat på dess id samt ägarens id.
     FolderEntity deleteFolder(UUID folderId, UUID folderOwner);
 
-    // Hittar ALLA folders för en användare
-    List<FolderEntity> getAllFoldersByUser(UUID ownerId);
+    // Hittar ALLA folders för en användare med filer.
+    List<FolderEntity> getAllFoldersWithFilesByUser(UUID ownerId);
 
     // Låter användaren uppdate en folders namn, och endast namnet.
-    FolderEntity updateFolderName(UUID folderId, UpdateFolderRequest request);
+    FolderEntity updateFolderName(UUID folderId, UpdateFolderRequest request, UUID userId);
 }

@@ -2,12 +2,14 @@ package project.dropbox.controllers.file;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import project.dropbox.dto.file.CreateFileDto;
 import project.dropbox.dto.file.DeletedFileDto;
 import project.dropbox.dto.file.GetFileDto;
 import project.dropbox.dto.file.UpdatedFileDto;
 import project.dropbox.models.file.FileEntity;
+import project.dropbox.models.user.User;
 import project.dropbox.requests.file.*;
 import project.dropbox.services.file.FileService;
 
@@ -24,30 +26,34 @@ public class FileController {
 
     @PostMapping("/create")
     public ResponseEntity<CreateFileDto> createFile(
-            @RequestBody CreateFileRequest request
+            @RequestBody CreateFileRequest request,
+            @AuthenticationPrincipal User authenticatedUser
             ) {
-        FileEntity newFile = new FileEntity(request.fileName(), request.data(), request.folder(), request.fileOwner());
 
-        FileEntity theFile = fileService.createFile(newFile);
+        FileEntity theFile = fileService.createFile(request, authenticatedUser.getUserId());
 
         return ResponseEntity.ok(CreateFileDto.from(theFile));
     }
 
     @GetMapping("/files")
-    public ResponseEntity<GetFileDto> findFileByIdAndOwner(
-            @RequestBody GetFileRequest request
+    public ResponseEntity<List<GetFileDto>> getFiles(
+            @AuthenticationPrincipal User authenticatedUser
     ) {
-        FileEntity theFile = fileService.findFileByIdAndOwner(request.fileId(), request.fileOwner());
+        List<FileEntity> files = fileService.findFilesByOwner(authenticatedUser.getUserId());
 
-        return ResponseEntity.ok(GetFileDto.from(theFile));
+       return ResponseEntity.ok(
+               files.stream()
+                       .map(GetFileDto::from)
+                       .toList()
+       );
     }
 
     @DeleteMapping("/delete/{fileId}")
     public ResponseEntity<DeletedFileDto> deleteFile(
             @PathVariable UUID fileId,
-            @RequestParam UUID ownerId
+            @AuthenticationPrincipal User authenticatedUser
             ) {
-        FileEntity deletedFile = fileService.deleteFile(fileId, ownerId);
+        FileEntity deletedFile = fileService.deleteFile(fileId, authenticatedUser.getUserId());
 
         return ResponseEntity.ok(DeletedFileDto.from(deletedFile));
 
@@ -56,10 +62,10 @@ public class FileController {
     @GetMapping("/folder/{folderId}")
     public ResponseEntity<List<GetFileDto>> getFilesByfolder(
             @PathVariable UUID folderId,
-            @RequestParam UUID ownerId
+            @AuthenticationPrincipal User authenticatedUser
             ) {
         return ResponseEntity.ok(
-                fileService.findFilesByFolder(folderId, ownerId)
+                fileService.findFilesByFolder(folderId, authenticatedUser.getUserId())
                         .stream()
                         .map(GetFileDto::from)
                         .toList()
@@ -69,9 +75,10 @@ public class FileController {
     @PutMapping("/update/{fileId}")
     public ResponseEntity<UpdatedFileDto> updateFile(
             @PathVariable UUID fileId,
-            @RequestBody UpdateFileRequest request
+            @RequestBody UpdateFileRequest request,
+            @AuthenticationPrincipal User authenticatedUser
     ) {
-        FileEntity theFile = fileService.updateFileName(fileId, request);
+        FileEntity theFile = fileService.updateFileName(fileId, request, authenticatedUser.getUserId());
 
         return ResponseEntity.ok(UpdatedFileDto.from(theFile));
     }

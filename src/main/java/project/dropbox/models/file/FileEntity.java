@@ -21,15 +21,15 @@ public class FileEntity {
     @Column(nullable = false)
     private String fileName;
 
-    @Lob
-    @Column(nullable = false)
+    @Basic(fetch = FetchType.LAZY)
+    @Column(columnDefinition = "bytea", nullable = false)
     private byte[] data;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "folder_id", nullable = false)
     private FolderEntity folder;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
     private User fileOwner;
 

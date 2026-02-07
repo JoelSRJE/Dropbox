@@ -2,12 +2,14 @@ package project.dropbox.controllers.folder;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import project.dropbox.dto.folder.DeletedFolderDto;
+import project.dropbox.dto.folder.GetFolderDto;
 import project.dropbox.dto.folder.NewFolderDto;
 import project.dropbox.dto.folder.UpdateFolderDto;
 import project.dropbox.models.folder.FolderEntity;
-import project.dropbox.repositories.folder.FolderRepository;
+import project.dropbox.models.user.User;
 import project.dropbox.requests.folder.CreateFolderRequest;
 import project.dropbox.requests.folder.UpdateFolderRequest;
 import project.dropbox.services.folder.FolderService;
@@ -21,33 +23,34 @@ import java.util.UUID;
 public class FolderController {
 
     private final FolderService folderService;
-    private final FolderRepository folderRepository;
 
     @PostMapping("/create")
     public ResponseEntity<NewFolderDto> createFolder(
-            @RequestBody CreateFolderRequest request
+            @RequestBody CreateFolderRequest request,
+            @AuthenticationPrincipal User authenticatedUser
             ) {
-        FolderEntity folder = folderService.createFolder(request);
+        FolderEntity folder = folderService.createFolder(request, authenticatedUser.getUserId());
 
         return ResponseEntity.ok(NewFolderDto.from(folder));
     }
 
-    @GetMapping("/folders/{ownerId}")
-    public ResponseEntity<List<NewFolderDto>> getAllFoldersForUser(
-            @PathVariable UUID ownerId
+    @GetMapping("/folders")
+    public ResponseEntity<List<GetFolderDto>> getAllFoldersForUser(
+            @AuthenticationPrincipal User authenticatedUser
             ) {
-        return ResponseEntity.ok(folderService.getAllFoldersByUser(ownerId)
+        return ResponseEntity.ok(folderService.getAllFoldersWithFilesByUser(authenticatedUser.getUserId())
                 .stream()
-                .map(NewFolderDto::from)
+                .map(GetFolderDto::from)
                 .toList());
     }
 
     @PutMapping("/update/{folderId}")
     public ResponseEntity<UpdateFolderDto> updateFolder(
             @PathVariable UUID folderId,
-            @RequestBody UpdateFolderRequest request
+            @RequestBody UpdateFolderRequest request,
+            @AuthenticationPrincipal User authenticatedUser
     ) {
-        FolderEntity updatedFolder = folderService.updateFolderName(folderId, request);
+        FolderEntity updatedFolder = folderService.updateFolderName(folderId, request, authenticatedUser.getUserId());
 
         return ResponseEntity.ok(UpdateFolderDto.from(updatedFolder));
     }
@@ -55,9 +58,9 @@ public class FolderController {
     @DeleteMapping("/delete/{folderId}")
     public ResponseEntity<DeletedFolderDto> deleteFolder(
             @PathVariable UUID folderId,
-            @RequestParam UUID ownerId
+            @AuthenticationPrincipal User authenticatedUser
     ) {
-        FolderEntity deletedFolder = folderService.deleteFolder(folderId, ownerId);
+        FolderEntity deletedFolder = folderService.deleteFolder(folderId, authenticatedUser.getUserId());
 
         return ResponseEntity.ok(DeletedFolderDto.from(deletedFolder));
     }

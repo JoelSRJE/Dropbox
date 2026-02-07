@@ -1,8 +1,10 @@
 package project.dropbox.models.folder;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import project.dropbox.models.file.FileEntity;
 import project.dropbox.models.user.User;
 
 import java.util.List;
@@ -29,8 +31,19 @@ public class FolderEntity {
     @JoinColumn(name = "parent_folder_id")
     private FolderEntity parentFolder;
 
-    @OneToMany(mappedBy = "parentFolder", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "parentFolder",
+            cascade = CascadeType.REMOVE,
+            orphanRemoval = true
+    )
     private List<FolderEntity> subFolders;
+
+    @OneToMany(
+            mappedBy = "folder",
+            cascade = CascadeType.REMOVE,
+            orphanRemoval = true
+    )
+    @JsonBackReference
+    private List<FileEntity> files;
 
     protected FolderEntity() {}
 
