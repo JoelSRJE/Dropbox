@@ -83,6 +83,7 @@ public class FileService implements IFileService {
 
         FileEntity newFile = new FileEntity(
                 request.fileName(),
+                request.contentType(),
                 request.data(),
                 folder,
                 owner
@@ -151,6 +152,28 @@ public class FileService implements IFileService {
         }
 
         return fileRepository.findByFolder_FolderIdAndFileOwner_UserId(folderId, ownerId);
+    }
+
+    /**
+     * Hittar en fil baserat på dess id och användarens.
+     *
+     * @param fileId - id:et för filen.
+     * @param userId - id:et för användaren.
+     * @return filen i byte[]
+     */
+    @Override
+    public FileEntity getFileByIdAndUser(UUID fileId, UUID userId) {
+
+        if(fileId == null) {
+            throw new FileIdIsNullException();
+        }
+        if (userId == null) {
+            throw new FileOwnerIdIsNullException();
+        }
+
+        return fileRepository
+                .findByFileIdAndFileOwner_UserId(fileId, userId)
+                .orElseThrow(() -> new FileDoesntExistException());
     }
 
     /**

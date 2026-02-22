@@ -1,5 +1,7 @@
 package project.dropbox.models.user;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,7 @@ public class User {
     private String email;
 
     @Column(nullable = false)
+    @JsonIgnore
     private String passwordHash;
 
     @Column(nullable = false)
@@ -38,6 +41,7 @@ public class User {
             cascade = CascadeType.REMOVE,
             orphanRemoval = true
     )
+    @JsonIgnore
     private List<FolderEntity> folders;
 
     @OneToMany(
@@ -45,6 +49,7 @@ public class User {
             cascade = CascadeType.REMOVE,
             orphanRemoval = true
     )
+    @JsonIgnore
     private List<FileEntity> files;
 
     protected User() {}

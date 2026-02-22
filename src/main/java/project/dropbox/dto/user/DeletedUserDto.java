@@ -9,7 +9,6 @@ import java.util.UUID;
 public record DeletedUserDto(
         UUID userId,
         String email,
-        String passwordHash,
         AccountType accountType,
         LocalDateTime createdAt
 ) {
@@ -17,7 +16,6 @@ public record DeletedUserDto(
         return new DeletedUserDto(
                 user.getUserId(),
                 user.getEmail(),
-                user.getPasswordHash(),
                 user.getAccountType(),
                 user.getCreatedAt()
         );

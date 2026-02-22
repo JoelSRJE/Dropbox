@@ -21,6 +21,9 @@ public class FileEntity {
     @Column(nullable = false)
     private String fileName;
 
+    @Column(nullable = false)
+    private String contentType;
+
     @Basic(fetch = FetchType.LAZY)
     @Column(columnDefinition = "bytea", nullable = false)
     private byte[] data;
@@ -35,8 +38,9 @@ public class FileEntity {
 
     protected FileEntity() {}
 
-    public FileEntity(String fileName, byte[] data, FolderEntity folder, User fileOwner) {
+    public FileEntity(String fileName, String contentType, byte[] data, FolderEntity folder, User fileOwner) {
         this.fileName = fileName;
+        this.contentType = contentType;
         this.data = data;
         this.folder = folder;
         this.fileOwner = fileOwner;

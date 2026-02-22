@@ -4,6 +4,7 @@ import project.dropbox.models.file.FileEntity;
 import project.dropbox.requests.file.CreateFileRequest;
 import project.dropbox.requests.file.UpdateFileRequest;
 
+import java.io.File;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,6 +21,9 @@ public interface IFileService {
 
     // Hittar filer från en specifik folder.
     List<FileEntity> findFilesByFolder(UUID folderId, UUID ownerId);
+
+    // Hittar filen utifrån dess id.
+    FileEntity getFileByIdAndUser(UUID fileId, UUID userId);
 
     // Låter användaren uppdatera en fils namn, och endast namnet.
     FileEntity updateFileName(UUID fileId, UpdateFileRequest request, UUID userId);

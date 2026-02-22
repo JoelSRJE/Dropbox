@@ -1,6 +1,8 @@
 package project.dropbox.controllers.file;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -46,6 +48,21 @@ public class FileController {
                        .map(GetFileDto::from)
                        .toList()
        );
+    }
+
+    @GetMapping("/download/{fileId}")
+    public ResponseEntity<byte[]> downloadFile(
+            @PathVariable UUID fileId,
+            @AuthenticationPrincipal User authenticatedUser
+    ) {
+
+        FileEntity file = fileService.getFileByIdAndUser(fileId, authenticatedUser.getUserId());
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(file.getContentType()))
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + file.getFileName() + "\"")
+                .body(file.getData());
     }
 
     @DeleteMapping("/delete/{fileId}")
