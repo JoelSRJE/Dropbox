@@ -159,7 +159,10 @@ public class FileService implements IFileService {
      *
      * @param fileId - id:et för filen.
      * @param userId - id:et för användaren.
-     * @return filen i byte[]
+     * @return - FileEntity-objektet.
+     * @throws FileIdIsNullException - OM fileId är null.
+     * @throws FileOwnerIdIsNullException - OM userId är null.
+     * @throws FileDoesntExistException - OM filen inte finns baserat på fileId och userId.
      */
     @Override
     public FileEntity getFileByIdAndUser(UUID fileId, UUID userId) {
